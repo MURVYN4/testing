@@ -5,11 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFC Access Example</title>
 </head>
-<body>
-    <h2>NFC Access Example</h2>
-    <button id="scanButton">Scan NFC Tag</button>
-    <button id="writeButton">Write to NFC Tag</button>
-    <pre id="log"></pre>
+   body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            color: #666666;
+            cursor: not-allowed;
+        }
 
     <script>
         const logElement = document.getElementById('log');
