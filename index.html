@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-   body {
+        body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
@@ -25,51 +25,56 @@
             color: #666666;
             cursor: not-allowed;
         }
-
-    <script>
-        const logElement = document.getElementById('log');
-
-        // Function to log messages
-        function consoleLog(message) {
-            logElement.textContent += message + '\n';
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
         }
-
-        // Check if NFC is supported
-        if ('NDEFReader' in window) {
-            consoleLog("NFC is supported!");
-
-            // Scan NFC Tag
-            document.getElementById('scanButton').onclick = async () => {
-                const ndef = new NDEFReader();
-                try {
-                    await ndef.scan();
-                    consoleLog("Scan started successfully!");
-
-                    ndef.onreading = event => {
-                        const decoder = new TextDecoder();
-                        for (const record of event.message.records) {
-                            consoleLog(`Record type: ${record.recordType}`);
-                            consoleLog(`MIME type: ${record.mediaType}`);
-                            consoleLog(`Data: ${decoder.decode(record.data)}`);
-                        }
-                    };
-                } catch (error) {
-                    consoleLog(`Error: ${error}`);
-                }
-            };
-
-            // Write to NFC Tag
-            document.getElementById('writeButton').onclick = async () => {
-                const ndef = new NDEFReader();
-                try {
-                    await ndef.write({ records: [{ recordType: "text", data: "Hello, NFC!" }] });
-                    consoleLog("NDEF message written!");
-                } catch (error) {
-                    consoleLog(`Error: ${error}`);
-                }
-            };
-        } else {
-            consoleLog("Web NFC is not supported on this device.");
+    </style>
+</head>
+<body>
+    <h1>NFC Reader</h1>
+    
+    <button id="scanButton" onclick="scanTag()">Scan for Tags</button>
+    <button id="stopScanButton" onclick="abortScan()" disabled>Abort Scan</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        let reader;
+        let abortController;
+        
+        function scanTag() {
+            if ("NDEFReader" in window) {
+                reader = new NDEFReader();
+                abortController = new AbortController();
+                
+                reader.onreading = (event) => {
+                    const decoder = new TextDecoder();
+                    for (const record of event.message.records) {
+                        document.getElementById("result").textContent = Record type: ${record.recordType}\nMIME type: ${record.mediaType}\n=== data ===\n${decoder.decode(record.data)};
+                    }
+                };
+                
+                reader.onreadingerror = () => {
+                    document.getElementById("result").textContent = "Error reading NFC tag.";
+                };
+                
+                reader.scan({ signal: abortController.signal }).then(() => {
+                    document.getElementById("scanButton").disabled = true;
+                    document.getElementById("stopScanButton").disabled = false;
+                }).catch(error => {
+                    document.getElementById("result").textContent = Error! Scan failed to start: ${error}.;
+                });
+            } else {
+                document.getElementById("result").textContent = "Web NFC is not supported.";
+            }
+        }
+        
+        function abortScan() {
+            abortController.abort();
+            document.getElementById("scanButton").disabled = false;
+            document.getElementById("stopScanButton").disabled = true;
         }
     </script>
 </body>
